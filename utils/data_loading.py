@@ -24,13 +24,15 @@ def load_image(filename):
 
 
 def unique_mask_values(idx, mask_dir, mask_suffix):
-    mask_file = list(mask_dir.glob(idx + mask_suffix + '.*'))[0]
-    mask = np.asarray(load_image(mask_file))
+    # mask_file = list(mask_dir.glob(idx + mask_suffix + '.*'))[0]
+    # mask = np.asarray(load_image(mask_file))
     if mask.ndim == 2:
-        return np.unique(mask)
+        # return np.unique(mask)
+        return [[0, 0, 0], [153, 153, 153], [178, 178, 178], [204, 204, 204], [229, 229, 229], [255, 255, 255]]
     elif mask.ndim == 3:
         mask = mask.reshape(-1, mask.shape[-1])
-        return np.unique(mask, axis=0)
+        # return np.unique(mask, axis=0)
+        return [[0, 0, 0], [153, 153, 153], [178, 178, 178], [204, 204, 204], [229, 229, 229], [255, 255, 255]]
     else:
         raise ValueError(f'Loaded masks should have 2 or 3 dimensions, found {mask.ndim}')
 
@@ -49,11 +51,11 @@ class BasicDataset(Dataset):
 
         logging.info(f'Creating dataset with {len(self.ids)} examples')
         logging.info('Scanning mask files to determine unique values')
-        # with Pool() as p:
-        #     unique = list(tqdm(
-        #         p.imap(partial(unique_mask_values, mask_dir=self.mask_dir, mask_suffix=self.mask_suffix), self.ids),
-        #         total=len(self.ids)
-        #     ))
+        with Pool() as p:
+            unique = list(tqdm(
+                p.imap(partial(unique_mask_values, mask_dir=self.mask_dir, mask_suffix=self.mask_suffix), self.ids),
+                total=len(self.ids)
+            ))
 
         # self.mask_values = list(sorted(np.unique(np.concatenate(unique), axis=0).tolist()))
         self.mask_values = [[0, 0, 0], [153, 153, 153], [178, 178, 178], [204, 204, 204], [229, 229, 229], [255, 255, 255]]
